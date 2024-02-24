@@ -1,10 +1,26 @@
 from flask import Flask, jsonify
+from flask_sqlalchemy import SQLAlchemy
 
-
+#creates Flask application by initializing the 'app' object
 app = Flask(__name__)
 
+# Configuration for the PostgreSQL database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://errick@localhost/students'
 
 
+# Initialize the SQLAlchemy extension
+db = SQLAlchemy(app)
+
+
+#represents student table
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50))
+    last_name = db.Column(db.String(50))
+    age = db.Column(db.Integer)
+    grade = db.Column(db.String(1))
+
+#student data
 students = [
      {'id': '1', 'first_name': 'John', 'last_name': 'Doe', 'age': 18, 'grade': 'A'},
      {'id': '2', 'first_name': 'Jane', 'last_name': 'Smith', 'age': 19, 'grade': 'B'},
@@ -88,14 +104,18 @@ def student_ages():
         student_ages.append(student_dict)
     return jsonify(student_ages)
 
-
+@app.route('/student', methods=['GET'])
+def get_student():
+    students = Student.query.all()
+    student_list = [
+        {'id': student.id, 'first_name': student.first_name, 'last_name': student.last_name, 'age': student.age, 'grade': student.grade}
+        for student in students
+    ]
+    return jsonify(student_list)
     
 
-
-
-
-
+#runs the flask application
 app.run(debug=True)
 
-# print(old_students())
+
 
